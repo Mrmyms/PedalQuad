@@ -1,0 +1,92 @@
+/* style.qss - Modern Dark Neon Theme for Carla */
+
+QMainWindow {
+    background-color: #121218;
+    color: white;
+}
+
+QMenuBar {
+    background-color: #111111;
+    color: white;
+    border-bottom: 1px solid #222222;
+}
+
+QMenuBar::item {
+    background: transparent;
+    padding: 6px 10px;
+}
+
+QMenuBar::item:selected {
+    background: #222222;
+    color: #00ffff;
+}
+
+QMenu {
+    background-color: #1a1a24;
+    color: white;
+    border: 1px solid #333333;
+}
+
+QMenu::item:selected {
+    background-color: #333333;
+    color: #00ffff;
+}
+
+QToolBar {
+    background-color: #111111;
+    border: none;
+    border-bottom: 2px solid #00ffff; /* Neon cyan accent under toolbar */
+    spacing: 5px;
+    padding: 5px;
+}
+
+QToolBar::separator {
+    background-color: #333;
+    width: 1px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+QToolButton {
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+QToolButton:hover {
+    background-color: #222222;
+    color: #00ffff;
+}
+
+QToolButton:pressed {
+    background-color: #00ffff;
+    color: black;
+}
+
+QTabWidget::pane {
+    border: none;
+    background-color: #121218;
+}
+
+QTabBar::tab {
+    background: #111111;
+    color: #aaaaaa;
+    padding: 8px 20px;
+    border: none;
+    border-right: 1px solid #222222;
+    border-bottom: 2px solid transparent;
+}
+
+QTabBar::tab:hover {
+    background: #1a1a24;
+    color: white;
+}
+
+QTabBar::tab:selected {
+    background: #121218;
+    color: #00ffff;
+    border-bottom: 2px solid #00ffff; /* Cyan glow for active tab */
+    font-weight: bold;
+}

@@ -48,14 +48,14 @@ class Theme(object):
 
         if idx == self.THEME_MODERN_DARK:
             # Canvas
-            self.canvas_bg = QColor(0, 0, 0)
+            self.canvas_bg = QColor("#121218")
 
             # Boxes
-            self.box_pen = QPen(QColor(76, 77, 78), 1, Qt.SolidLine)
-            self.box_pen_sel = QPen(QColor(206, 207, 208), 1, Qt.DashLine)
-            self.box_bg_1 = QColor(32, 34, 35)
-            self.box_bg_2 = QColor(43, 47, 48)
-            self.box_shadow = QColor(89, 89, 89, 180)
+            self.box_pen = QPen(QColor(0, 255, 255, 60), 1, Qt.SolidLine)
+            self.box_pen_sel = QPen(QColor(0, 255, 255, 255), 2, Qt.SolidLine)
+            self.box_bg_1 = QColor("#1f1f26")
+            self.box_bg_2 = QColor("#2a2a35")
+            self.box_shadow = QColor(0, 0, 0, 180)
             self.box_header_pixmap = None
             self.box_header_height = 24
             self.box_header_spacing = 0
@@ -63,39 +63,39 @@ class Theme(object):
             self.box_text = QPen(QColor(240, 240, 240), 0)
             self.box_text_sel = self.box_text
             self.box_text_ypos = 16
-            self.box_font_name = "Deja Vu Sans"
+            self.box_font_name = "Inter"
             self.box_font_size = 11
             self.box_font_state = QFont.Bold
 
             self.box_bg_type = self.THEME_BG_GRADIENT
-            self.box_use_icon = True
+            self.box_use_icon = False
 
             # Ports
             self.port_text = QPen(QColor(250, 250, 250), 0)
             self.port_text_ypos = 12
             self.port_bg_pixmap = None
-            self.port_font_name = "Deja Vu Sans"
+            self.port_font_name = "Inter"
             self.port_font_size = 11
             self.port_font_state = QFont.Normal
-            self.port_mode = self.THEME_PORT_POLYGON
+            self.port_mode = self.THEME_PORT_SQUARE # We will override drawing with circles
 
-            self.port_audio_jack_pen = QPen(QColor(63, 90, 126), 1)
-            self.port_audio_jack_pen_sel = QPen(QColor(63 + 30, 90 + 30, 126 + 30), 1)
-            self.port_midi_jack_pen = QPen(QColor(159, 44, 42), 1)
-            self.port_midi_jack_pen_sel = QPen(QColor(159 + 30, 44 + 30, 42 + 30), 1)
-            self.port_midi_alsa_pen = QPen(QColor(93, 141, 46), 1)
-            self.port_midi_alsa_pen_sel = QPen(QColor(93 + 30, 141 + 30, 46 + 30), 1)
-            self.port_parameter_pen = QPen(QColor(137, 76, 43), 1)
-            self.port_parameter_pen_sel = QPen(QColor(137 + 30, 76 + 30, 43 + 30), 1)
+            self.port_audio_jack_pen = QPen(QColor(0, 255, 255, 100), 1)
+            self.port_audio_jack_pen_sel = QPen(QColor(0, 255, 255), 2)
+            self.port_midi_jack_pen = QPen(QColor(255, 0, 255, 100), 1)
+            self.port_midi_jack_pen_sel = QPen(QColor(255, 0, 255), 2)
+            self.port_midi_alsa_pen = QPen(QColor(255, 0, 255, 100), 1)
+            self.port_midi_alsa_pen_sel = QPen(QColor(255, 0, 255), 2)
+            self.port_parameter_pen = QPen(QColor(0, 255, 0, 100), 1)
+            self.port_parameter_pen_sel = QPen(QColor(0, 255, 0), 2)
 
-            self.port_audio_jack_bg = QColor(35, 61, 99)
-            self.port_audio_jack_bg_sel = QColor(35 + 50, 61 + 50, 99 + 50)
-            self.port_midi_jack_bg = QColor(120, 15, 16)
-            self.port_midi_jack_bg_sel = QColor(120 + 50, 15 + 50, 16 + 50)
-            self.port_midi_alsa_bg = QColor(64, 112, 18)
-            self.port_midi_alsa_bg_sel = QColor(64 + 50, 112 + 50, 18 + 50)
-            self.port_parameter_bg = QColor(101, 47, 16)
-            self.port_parameter_bg_sel = QColor(101 + 50, 47 + 50, 16 + 50)
+            self.port_audio_jack_bg = QColor(0, 255, 255, 50)
+            self.port_audio_jack_bg_sel = QColor(0, 255, 255)
+            self.port_midi_jack_bg = QColor(255, 0, 255, 50)
+            self.port_midi_jack_bg_sel = QColor(255, 0, 255)
+            self.port_midi_alsa_bg = QColor(255, 0, 255, 50)
+            self.port_midi_alsa_bg_sel = QColor(255, 0, 255)
+            self.port_parameter_bg = QColor(0, 255, 0, 50)
+            self.port_parameter_bg_sel = QColor(0, 255, 0)
 
             self.port_audio_jack_text = self.port_text
             self.port_audio_jack_text_sel = self.port_text
@@ -106,27 +106,27 @@ class Theme(object):
             self.port_parameter_text = self.port_text
             self.port_parameter_text_sel = self.port_text
 
-            self.port_height = 16
+            self.port_height = 14
             self.port_offset = 0
-            self.port_spacing = 2
-            self.port_spacingT = 2
+            self.port_spacing = 6
+            self.port_spacingT = 6
 
             # Lines
-            self.line_audio_jack = QColor(63, 90, 126)
-            self.line_audio_jack_sel = QColor(63 + 90, 90 + 90, 126 + 90)
-            self.line_audio_jack_glow = QColor(100, 100, 200)
-            self.line_midi_jack = QColor(159, 44, 42)
-            self.line_midi_jack_sel = QColor(159 + 90, 44 + 90, 42 + 90)
-            self.line_midi_jack_glow = QColor(200, 100, 100)
-            self.line_midi_alsa = QColor(93, 141, 46)
-            self.line_midi_alsa_sel = QColor(93 + 90, 141 + 90, 46 + 90)
-            self.line_midi_alsa_glow = QColor(100, 200, 100)
-            self.line_parameter = QColor(137, 76, 43)
-            self.line_parameter_sel = QColor(137 + 90, 76 + 90, 43 + 90)
-            self.line_parameter_glow = QColor(166, 133, 133)
+            self.line_audio_jack = QColor(0, 150, 150)
+            self.line_audio_jack_sel = QColor(0, 255, 255)
+            self.line_audio_jack_glow = QColor(0, 255, 255)
+            self.line_midi_jack = QColor(150, 0, 150)
+            self.line_midi_jack_sel = QColor(255, 0, 255)
+            self.line_midi_jack_glow = QColor(255, 0, 255)
+            self.line_midi_alsa = QColor(150, 0, 150)
+            self.line_midi_alsa_sel = QColor(255, 0, 255)
+            self.line_midi_alsa_glow = QColor(255, 0, 255)
+            self.line_parameter = QColor(0, 150, 0)
+            self.line_parameter_sel = QColor(0, 255, 0)
+            self.line_parameter_glow = QColor(0, 255, 0)
 
-            self.rubberband_pen = QPen(QColor(206, 207, 208), 1, Qt.SolidLine)
-            self.rubberband_brush = QColor(76, 77, 78, 100)
+            self.rubberband_pen = QPen(QColor(0, 255, 255), 1, Qt.DashLine)
+            self.rubberband_brush = QColor(0, 255, 255, 40)
 
         elif idx == self.THEME_MODERN_DARK_TINY:
             # Canvas

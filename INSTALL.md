@@ -1,112 +1,48 @@
-# INSTALL for Carla
+# INSTALL for PedalCuad
 
-NOTE: when using MSYS2 on Windows, an additional step is necessary in order
-to solve an issue with symbolic links to some dependency folders before build:
-```
-$ make msys2fix
-```
+To build PedalCuad (forked from Carla), run the standard make commands. 
+The backend C++ engine will compile based on your OS and available libraries.
 
-To install Carla, simply run as usual:
-```
+```bash
 $ make
-$ [sudo] make install
 ```
 
-You can run it without installing, by using instead:
+Once compiled, you can run the PedalCuad frontend UI without installing it system-wide:
+```bash
+$ ./source/frontend/pedalcuad
 ```
-$ make
-$ ./source/frontend/carla
-```
-
-Packagers can make use of the `PREFIX` and `DESTDIR` variable during install, like this:
-```
-$ make install PREFIX=/usr DESTDIR=./test-dir
-```
+*(Note: Do not use the old `carla` launcher, use `pedalcuad` instead).*
 
 ## BUILD DEPENDENCIES
 
-There are no required build dependencies. The default build is probably not what you want though.
+There are no strict required C++ build dependencies, but the default build may not be complete without them.
 
-If you want the frontend (which is likely), you will need PyQt5 (python3 version).
+Since the PedalCuad interface is entirely written in Python/Qt, **you will need PyQt5** (python3 version) to run the frontend.
 
 You likely will also want:
+ - `libmagic/file` (for auto-detection of binary types, needed for plugin-bridges)
+ - `liblo` (for OSC support, essential if you plan to use a remote control app for the pedal)
 
- - libmagic/file (for auto-detection of binary types, needed for plugin-bridges)
- - liblo         (for OSC support, also a requirement for DSSI UIs)
+Optional for Linux hardware builds (e.g. Raspberry Pi):
+ - `ALSA`
+ - `PulseAudio`
+ - `X11` or `Wayland` depending on your display server.
 
-Optional for extra Linux-only engine features:
+## BUILD BRIDGES
 
- - ALSA
- - PulseAudio
- - X11 (LV2/VST X11 UI support)
+PedalCuad preserves Carla's ability to make use of plugin bridges to load additional plugin types (e.g. running 32bit or Windows plugins on a Linux pedal hardware).
 
-Optional for extended LV2 UIs support: (Linux only)
-
- - Gtk2
- - Gtk3
- - Qt4
- - Qt5
-
-Optional for extra samplers support:
-
- - FluidSynth (SF2/3)
-
-Optional for extra LADSPA plugin information:
-
- - python3-rdflib
-
-
-You can use:
-```
-$ make features
-```
-To find out which dependencies are missing.
-
-
-Under Debian based systems, you can use this command to install everything:
-```
-sudo apt install python3-pyqt5.qtsvg python3-rdflib pyqt5-dev-tools \
-  libmagic-dev liblo-dev libasound2-dev libpulse-dev libx11-dev \
-  libgtk2.0-dev libgtk-3-dev libqt4-dev qtbase5-dev libfluidsynth-dev
-```
-
-Under Fedora, you can use the following command instead:
-```
-sudo dnf install python3-qt5-devel python3-rdflib \
-  file-devel liblo-devel alsa-lib-devel pulseaudio-libs-devel libX11-devel
-  gtk2-devel gtk3-devel qt4-devel qt5-devel fluidsynth-devel libsndfile-devel
-```
-
-## BUILD BRIDGES (Experimental)
-
-Carla can make use of plugin bridges to load additional plugin types.
-
-### 32bit plugins on 64bit systems
-
-Simply run `make posix32` after a regular Carla build, and install or run Carla locally.<br/>
-This feature requires a compiler capable of building 32bit binaries.
-
-### JACK Applications inside Carla
-
-This is built by default on Linux systems.<br/>
-Requires LD_PRELOAD support by the OS and the GCC compiler.<br/>
-Does not work with clang. (if you discover why, please let me know!)
-
-### Windows plugins (via Wine)
+### Windows plugins on Linux (via Wine)
 
 Requires a mingw compiler, and winegcc.
-
-First, we build the Windows bridges using mingw, like this: (adjust as needed)
-```
+First, we build the Windows bridges using mingw:
+```bash
 make win32 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++
 make win64 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++
 ```
 
 To finalize, we build the wine<->native bridges using winegcc:
-```
+```bash
 make wine32
 make wine64
 ```
-
-Then install or run Carla locally as usual.<br/>
-Don't forget to enable experimental options and plugin bridges in Carla settings to actually be able to use them.

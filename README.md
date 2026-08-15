@@ -1,35 +1,24 @@
-# ![Carla Logo](resources/48x48/carla.png) Carla Plugin Host
-[![build](https://github.com/falkTX/Carla/actions/workflows/build.yml/badge.svg)](https://github.com/falkTX/Carla/actions/workflows/build.yml)
+# ![PedalCuad Logo](resources/48x48/carla.png) PedalCuad
 
-What is Carla?
+What is PedalCuad?
 ---------------
 
-Carla is a fully-featured audio plugin host, with support for many audio drivers and plugin formats.<br>
-It's open source and licensed under the GNU General Public License, version 2 or later.
+**PedalCuad** is a minimalistic, touchscreen-optimized audio plugin host designed specifically as the "brain" for custom digital guitar pedal hardware. 
+
+Originally forked from the powerful **Carla** project by falkTX, PedalCuad strips away the complex desktop UI elements (like traditional menu bars, tabs, and rack views) and focuses exclusively on a fullscreen **Patchbay** experience. It is designed to be controlled easily via a small touchscreen on a pedalboard.
 
 Features
 ---------
 
-* LADSPA, DSSI, LV2 and VST2, VST3 and AU plugin formats
-* SF2/3 and SFZ sound banks
-* Internal audio and midi file player
-* Automation of plugin parameters via MIDI CC
-* Remote control over OSC
-* Rack and Patchbay processing modes, plus Single and Multi-Client if using JACK
-* Native audio drivers (ALSA, DirectSound, CoreAudio, etc) and JACK
+* **Touch-Optimized UI:** No cluttered menus. A clean, fullscreen Patchbay with a left sidebar for plugin management.
+* **Custom Parameter Drawer:** A modern, DAW-like parameter drawer with linear touch-friendly knobs and quick-access ON/OFF (Bypass) controls.
+* **Plugin Support:** LADSPA, DSSI, LV2, VST2, VST3, and AU plugin formats.
+* **OSC Remote Control:** Fully preserved Open Sound Control backend, allowing you to build companion mobile apps to control the pedal remotely.
+* **Cross-Platform Base:** Runs natively on Linux (ALSA/PulseAudio/JACK), macOS, and Windows.
+* **Independent Configuration:** Uses isolated configuration paths (`.config/PedalCuad`) to prevent conflicts with standard Carla installations.
 
-In experimental phase / work in progress:
-* Export any Carla loadable plugin or sound bank as an LV2 plugin
-* Plugin bridge support (such as running 32bit plugins on a 64bit Carla, or Windows plugins on Linux)
-* Run JACK applications as audio plugins
-* Transport controls, sync with JACK Transport or Ableton Link
-
-Carla is also available as an LV2 plugin and VST2 plugin.
-
-Screenshot
+Origin & License
 ----------
 
-![Screenshot](https://kx.studio/screenshots/carla.png)
-
-
-See the [official webpage](https://kx.studio/Applications:Carla) also.
+This project is a hardware-focused fork of [Carla](https://kx.studio/Applications:Carla) and inherits its powerful C++ audio engine.
+It is open source and licensed under the GNU General Public License, version 2 or later.

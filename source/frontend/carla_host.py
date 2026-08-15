@@ -58,6 +58,7 @@ from carla_database import *
 from carla_settings import *
 from carla_utils import *
 from carla_widgets import *
+from pedalboard_view import ParameterDrawer
 
 from patchcanvas import patchcanvas
 from widgets.digitalpeakmeter import DigitalPeakMeter
@@ -136,6 +137,28 @@ class HostWindow(QMainWindow):
         self.ui = ui_carla_host.Ui_CarlaHostW()
         self.ui.setupUi(self)
         gCarla.gui = self
+        
+        # UI Simplification for Pedal Hardware
+        # Hide the main menu bar (File, Engine, Canvas, etc) to save space. We use the toolbar.
+        self.ui.menubar.hide()
+        
+        # Hide the tabs so we only see the active tab contents (Patchbay)
+        self.ui.tabWidget.tabBar().hide()
+
+        # Remove the obsolete Rack tab (so Patchbay is the main view)
+        self.ui.tabWidget.removeTab(0)
+        self.ui.tabWidget.setCurrentIndex(0)
+        # Sidebar toggle action
+        try:
+            import os
+            from PyQt5.QtGui import QIcon
+            from PyQt5.QtWidgets import QAction
+            icon_dir = os.path.join(os.path.dirname(__file__), "modern_icons")
+            self.act_toggle_sidebar = QAction(QIcon(f"{icon_dir}/sidebar.svg"), "Toggle Sidebar", self)
+            self.act_toggle_sidebar.triggered.connect(lambda: self.ui.dockWidget.setVisible(not self.ui.dockWidget.isVisible()))
+            self.ui.toolBar.addAction(self.act_toggle_sidebar)
+        except Exception as e:
+            print("Failed to load modern icons:", e)
 
         if False:
             # kdevelop likes this :)
@@ -408,9 +431,15 @@ class HostWindow(QMainWindow):
         self.ui.patchbay.layout().addWidget(self.ui.scrollArea, 1, 0, 1, 0)
 
         self.ui.scrollArea.setEnabled(False)
+        self.ui.scrollArea.hide()  # Always hide the virtual keyboard
 
         self.ui.miniCanvasPreview.setRealParent(self)
         self.ui.tw_miniCanvas.tabBar().hide()
+        self.ui.tw_miniCanvas.hide()  # Hide the entire bottom piano strip
+
+        # Add the nice ParameterDrawer to the bottom of the Patchbay
+        self.patchbay_drawer = ParameterDrawer(self.host, self.ui.patchbay)
+        self.ui.patchbay.layout().addWidget(self.patchbay_drawer, 2, 0, 1, 3)
 
         # ----------------------------------------------------------------------------------------------------
         # Set up GUI (logs)
@@ -442,6 +471,7 @@ class HostWindow(QMainWindow):
 
         if withCanvas:
             self.scene = patchcanvas.PatchScene(self, self.ui.graphicsView)
+            self.ui.graphicsView.setStyleSheet("background-color: #121218;")
             self.ui.graphicsView.setScene(self.scene)
 
             if self.fSavedSettings[CARLA_KEY_CANVAS_USE_OPENGL] and hasGL:
@@ -483,6 +513,26 @@ class HostWindow(QMainWindow):
             self.ui.b_transport_forwards.setIcon(getIcon('media-seek-forward', 16, 'svgz'))
             self.ui.logs_clear.setIcon(getIcon('edit-clear', 16, 'svgz'))
             self.ui.logs_save.setIcon(getIcon('document-save', 16, 'svgz'))
+
+        # ----------------------------------------------------------------------------------------------------
+        # Modernize Icons
+        try:
+            import os
+            from PyQt5.QtGui import QIcon
+            icon_dir = os.path.join(os.path.dirname(__file__), "modern_icons")
+            self.ui.act_file_new.setIcon(QIcon(f"{icon_dir}/new.svg"))
+            self.ui.act_file_open.setIcon(QIcon(f"{icon_dir}/open.svg"))
+            self.ui.act_file_save.setIcon(QIcon(f"{icon_dir}/save.svg"))
+            self.ui.act_file_save_as.setIcon(QIcon(f"{icon_dir}/save.svg"))
+            self.ui.act_plugin_add.setIcon(QIcon(f"{icon_dir}/add.svg"))
+            if hasattr(self.ui, 'act_plugin_remove_all'):
+                self.ui.act_plugin_remove_all.setIcon(QIcon(f"{icon_dir}/remove.svg"))
+            if hasattr(self.ui, 'act_engine_panic'):
+                self.ui.act_engine_panic.setIcon(QIcon(f"{icon_dir}/panic.svg"))
+            if hasattr(self.ui, 'act_settings_configure'):
+                self.ui.act_settings_configure.setIcon(QIcon(f"{icon_dir}/settings.svg"))
+        except Exception as e:
+            print("Failed to apply modern icons:", e)
 
         # ----------------------------------------------------------------------------------------------------
         # Connect actions to functions
@@ -757,7 +807,7 @@ class HostWindow(QMainWindow):
         self.fLadspaRdfNeedsUpdate = True
 
     def setProperWindowTitle(self):
-        title = self.fClientName
+        title = "PedalCuad"
 
         if self.fProjectFilename and not self.host.nsmOK:
             title += " - %s" % os.path.basename(self.fProjectFilename)
@@ -936,7 +986,7 @@ class HostWindow(QMainWindow):
 
         if self.host.engine_init(audioDriver, self.fClientName):
             if firstInit and not (self.host.isControl or self.host.isPlugin):
-                settings = QSafeSettings()
+                settings = QSafeSettings("PedalCuad", "PedalCuad2")
                 lastBpm  = settings.value("LastBPM", 120.0, float)
                 del settings
                 if lastBpm >= 20.0:
@@ -1233,7 +1283,7 @@ class HostWindow(QMainWindow):
             except ValueError:
                 pass
             else:
-                settingsDBf = QSafeSettings("falkTX", "CarlaDatabase2")
+                settingsDBf = QSafeSettings("PedalCuad", "PedalCuadDatabase2")
                 settingsDBf.setValue("PluginDatabase/Favorites", self.fFavoritePlugins)
                 settingsDBf.sync()
                 del settingsDBf
@@ -1529,6 +1579,9 @@ class HostWindow(QMainWindow):
         patchcanvas.setOptions(pOptions)
         patchcanvas.setFeatures(pFeatures)
         patchcanvas.init("Carla2", self.scene, canvasCallback, False)
+
+        # Connect scene selection to the new ParameterDrawer in Patchbay
+        self.scene.selectionChanged.connect(self._on_canvas_selection_changed)
 
         tryCanvasSize = self.fSavedSettings[CARLA_KEY_CANVAS_SIZE].split("x")
 
@@ -1885,7 +1938,7 @@ class HostWindow(QMainWindow):
     # Settings
 
     def saveSettings(self):
-        settings = QSafeSettings()
+        settings = QSafeSettings("PedalCuad", "PedalCuad2")
 
         settings.setValue("Geometry", self.saveGeometry())
         settings.setValue("ShowToolbar", self.ui.toolBar.isEnabled())
@@ -1910,7 +1963,7 @@ class HostWindow(QMainWindow):
         return settings
 
     def loadSettings(self, firstTime):
-        settings = QSafeSettings()
+        settings = QSafeSettings("PedalCuad", "PedalCuad2")
 
         if firstTime:
             geometry = settings.value("Geometry", QByteArray(), QByteArray)
@@ -1952,7 +2005,7 @@ class HostWindow(QMainWindow):
             self.ui.act_settings_show_keyboard.setChecked(showKeyboard)
             self.ui.scrollArea.setVisible(showKeyboard)
 
-            settingsDBf = QSafeSettings("falkTX", "CarlaDatabase2")
+            settingsDBf = QSafeSettings("PedalCuad", "PedalCuadDatabase2")
             self.fFavoritePlugins = settingsDBf.value("PluginDatabase/Favorites", [], list)
 
             QTimer.singleShot(100, self.slot_restoreCanvasScrollbarValues)
@@ -1987,7 +2040,7 @@ class HostWindow(QMainWindow):
         else:
             self.fSavedSettings[CARLA_KEY_CANVAS_INLINE_DISPLAYS] = False
 
-        settings2 = QSafeSettings("falkTX", "Carla2")
+        settings2 = QSafeSettings("PedalCuad", "PedalCuad2")
 
         if self.host.experimental:
             visible = settings2.value(CARLA_KEY_EXPERIMENTAL_JACK_APPS, CARLA_DEFAULT_EXPERIMENTAL_JACK_APPS, bool)
@@ -2019,7 +2072,7 @@ class HostWindow(QMainWindow):
 
     @pyqtSlot()
     def slot_restoreCanvasScrollbarValues(self):
-        settings = QSafeSettings()
+        settings = QSafeSettings("PedalCuad", "PedalCuad2")
         horiz = settings.value("HorizontalScrollBarValue", int(self.ui.graphicsView.horizontalScrollBar().maximum()/2), int)
         vertc = settings.value("VerticalScrollBarValue", int(self.ui.graphicsView.verticalScrollBar().maximum()/2), int)
         self.ui.graphicsView.horizontalScrollBar().setValue(horiz)
@@ -2472,11 +2525,31 @@ class HostWindow(QMainWindow):
     # --------------------------------------------------------------------------------------------------------
     # Misc
 
+    def _on_canvas_selection_changed(self):
+        if not hasattr(self, 'patchbay_drawer'):
+            return
+        selected = self.scene.selectedItems()
+        if not selected:
+            return
+        for item in selected:
+            group_id = getattr(item, 'm_group_id', None)
+            plugin_id = getattr(item, 'm_plugin_id', -1)
+            if group_id is not None:
+                pid = plugin_id if plugin_id >= 0 else group_id
+                try:
+                    name = self.host.get_plugin_info(pid)['name']
+                except Exception:
+                    name = f"Plugin {pid}"
+                self.patchbay_drawer.set_plugin(pid, name)
+                return
+
     @pyqtSlot(int)
     def slot_tabChanged(self, index):
+        print(f"TAB CHANGED TO INDEX: {index}")
+        for i in range(self.ui.tabWidget.count()):
+            print(f"  Tab {i}: {self.ui.tabWidget.tabText(i)} (Widget: {self.ui.tabWidget.widget(i)})")
         if index != 1:
             return
-
         self.ui.graphicsView.setFocus()
 
     @pyqtSlot(int)
@@ -3186,7 +3259,7 @@ def initHost(initName, libPrefix, isControl, isPlugin, failError, HostClass = No
     # --------------------------------------------------------------------------------------------------------
     # Check if we should open main lib as local or global
 
-    settings = QSafeSettings("falkTX", "Carla2")
+    settings = QSafeSettings("PedalCuad", "PedalCuad2")
 
     loadGlobal = settings.value(CARLA_KEY_EXPERIMENTAL_LOAD_LIB_GLOBAL, CARLA_DEFAULT_EXPERIMENTAL_LOAD_LIB_GLOBAL, bool)
 
@@ -3263,7 +3336,7 @@ def loadHostSettings(host):
     # kdevelop likes this :)
     if False: host = CarlaHostNull()
 
-    settings = QSafeSettings("falkTX", "Carla2")
+    settings = QSafeSettings("PedalCuad", "PedalCuad2")
 
     host.experimental = settings.value(CARLA_KEY_MAIN_EXPERIMENTAL, CARLA_DEFAULT_MAIN_EXPERIMENTAL, bool)
     host.exportLV2 = settings.value(CARLA_KEY_EXPERIMENTAL_EXPORT_LV2, CARLA_DEFAULT_EXPERIMENTAL_LV2_EXPORT, bool)

@@ -111,6 +111,11 @@ class CarlaApplication():
             return
 
         self.fApp.setStyle("carla" if stylesDir else "fusion")
+        try:
+            with open("/Users/mr.myms/Downloads/Carla/source/frontend/style.qss", "r") as f:
+                self.fApp.setStyleSheet(f.read())
+        except Exception as e:
+            print("Failed to load QSS:", e)
 
         if WINDOWS:
             carlastyle1 = os.path.join(pathBinaries, "styles", "carlastyle.dll")
@@ -170,7 +175,7 @@ class CarlaApplication():
         else:
             if QT_VERSION >= 0x50700:
                 self.fApp.setDesktopFileName("carla")
-            self.fApp.setWindowIcon(QIcon(":/scalable/carla.svg"))
+            self.fApp.setWindowIcon(QIcon(":/256x256/carla.png"))
 
     def createPaletteBlack(self):
         self.fPalBlack = QPalette()
