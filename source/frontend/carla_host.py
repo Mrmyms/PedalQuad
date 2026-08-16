@@ -540,11 +540,6 @@ class HostWindow(QMainWindow):
         self.ui.act_settings_show_meters.toggled.connect(self.slot_showCanvasMeters)
         self.ui.act_settings_show_keyboard.toggled.connect(self.slot_showCanvasKeyboard)
         self.ui.act_settings_show_side_panel.toggled.connect(self.slot_showSidePanel)
-        self.ui.act_settings_configure.triggered.connect(self.slot_configureCarla)
-
-        self.ui.act_help_about.triggered.connect(self.slot_aboutCarla)
-        self.ui.act_help_about_juce.triggered.connect(self.slot_aboutJuce)
-        self.ui.act_help_about_qt.triggered.connect(self.slot_aboutQt)
 
         self.ui.cb_disk.currentIndexChanged.connect(self.slot_diskFolderChanged)
         self.ui.b_disk_add.clicked.connect(self.slot_diskFolderAdd)
@@ -644,9 +639,6 @@ class HostWindow(QMainWindow):
             self.ui.cb_transport_link.setEnabled(False)
             self.ui.cb_transport_link.setVisible(False)
 
-        if "juce" not in features:
-            self.ui.act_help_about_juce.setEnabled(False)
-            self.ui.act_help_about_juce.setVisible(False)
 
         # Plugin needs to have timers always running so it receives messages
         if self.host.isPlugin or self.host.isRemote:
@@ -2073,38 +2065,7 @@ class HostWindow(QMainWindow):
         self.ui.scrollArea.setVisible(yesNo)
         QTimer.singleShot(0, self.slot_miniCanvasCheckAll)
 
-    @pyqtSlot()
-    def slot_configureCarla(self):
-        dialog = CarlaSettingsW(self.fParentOrSelf, self.host, True, hasGL)
-        if not dialog.exec_():
-            return
 
-        self.loadSettings(False)
-
-        if self.fWithCanvas:
-            patchcanvas.clear()
-            self.setupCanvas()
-            self.slot_miniCanvasCheckAll()
-
-        if self.host.processMode == ENGINE_PROCESS_MODE_CONTINUOUS_RACK and self.host.isPlugin:
-            pass
-        elif self.host.is_engine_running():
-            self.host.patchbay_refresh(self.fExternalPatchbay)
-
-    # --------------------------------------------------------------------------------------------------------
-    # About (menu actions)
-
-    @pyqtSlot()
-    def slot_aboutCarla(self):
-        CarlaAboutW(self.fParentOrSelf, self.host).exec_()
-
-    @pyqtSlot()
-    def slot_aboutJuce(self):
-        JuceAboutW(self.fParentOrSelf).exec_()
-
-    @pyqtSlot()
-    def slot_aboutQt(self):
-        QApplication.instance().aboutQt()
 
     # --------------------------------------------------------------------------------------------------------
     # Disk (menu actions)
@@ -3517,62 +3478,3 @@ def setEngineSettings(host, oscPort = None):
 
     return audioDriver
 
-# ------------------------------------------------------------------------------------------------------------
-# Run Carla without showing UI
-
-def runHostWithoutUI(host):
-    # kdevelop likes this :)
-    if False: host = CarlaHostNull()
-
-    # --------------------------------------------------------------------------------------------------------
-    # Some initial checks
-
-    if not gCarla.nogui:
-        return
-
-    projectFile = getInitialProjectFile(True)
-
-    if gCarla.nogui is True:
-        oscPort = None
-
-        if not projectFile:
-            print("Carla no-gui mode can only be used together with a project file.")
-            sys.exit(1)
-
-    else:
-        oscPort = gCarla.nogui
-
-    # --------------------------------------------------------------------------------------------------------
-    # Additional imports
-
-    from time import sleep
-
-    # --------------------------------------------------------------------------------------------------------
-    # Init engine
-
-    audioDriver = setEngineSettings(host, oscPort)
-    if not host.engine_init(audioDriver, "Carla"):
-        print("Engine failed to initialize, possible reasons:\n%s" % host.get_last_error())
-        sys.exit(1)
-
-    if projectFile and not host.load_project(projectFile):
-        print("Failed to load selected project file, possible reasons:\n%s" % host.get_last_error())
-        host.engine_close()
-        sys.exit(1)
-
-    # --------------------------------------------------------------------------------------------------------
-    # Idle
-
-    print("Carla ready!")
-
-    while host.is_engine_running() and not gCarla.term:
-        host.engine_idle()
-        sleep(0.0333) # 30 Hz
-
-    # --------------------------------------------------------------------------------------------------------
-    # Stop
-
-    host.engine_close()
-    sys.exit(0)
-
-# ------------------------------------------------------------------------------------------------------------
