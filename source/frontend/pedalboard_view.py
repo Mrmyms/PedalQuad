@@ -209,6 +209,7 @@ class ParameterDrawer(QFrame):
         self.btn_bypass_drawer.setStyleSheet("background-color: #00ffff; color: #000; border-radius: 12px; font-weight: bold;")
         self.btn_bypass_drawer.clicked.connect(self._toggle_bypass_drawer)
         self.is_active_drawer = True
+        self.plugin_bypass_states = {} # Track bypass state per plugin
         
         self.preset_combo = QComboBox()
         self.preset_combo.setStyleSheet("background: #222; color: #fff; border: 1px solid #00ffff; padding: 2px;")
@@ -249,11 +250,9 @@ class ParameterDrawer(QFrame):
         self.pluginId = pluginId
         self.title.setText(name)
         
-        # Read current bypass state if possible
+        # Read current bypass state from our local tracker
         try:
-            # -3 is PARAMETER_DRYWET
-            val = self.host.get_internal_parameter_value(pluginId, -3)
-            self.is_active_drawer = (val > 0.5)
+            self.is_active_drawer = self.plugin_bypass_states.get(pluginId, True)
         except:
             self.is_active_drawer = True
         self._update_drawer_bypass_style()
@@ -325,6 +324,7 @@ class ParameterDrawer(QFrame):
     def _toggle_bypass_drawer(self):
         if self.pluginId is not None:
             self.is_active_drawer = not self.is_active_drawer
+            self.plugin_bypass_states[self.pluginId] = self.is_active_drawer
             self._update_drawer_bypass_style()
             self.host.set_drywet(self.pluginId, 1.0 if self.is_active_drawer else 0.0)
             
