@@ -55,7 +55,7 @@ import ui_carla_host
 from carla_app import *
 from carla_backend_qt import CarlaHostQtDLL, CarlaHostQtNull
 from carla_database import *
-from carla_settings import *
+
 from carla_utils import *
 from carla_widgets import *
 from pedalboard_view import ParameterDrawer
