@@ -325,7 +325,7 @@ class ParameterDrawer(QFrame):
         if self.pluginId is not None:
             self.is_active_drawer = not self.is_active_drawer
             self._update_drawer_bypass_style()
-            self.host.set_drywet(self.pluginId, 1.0 if self.is_active_drawer else 0.0)
+            self.host.set_active(self.pluginId, self.is_active_drawer)
             
     def _update_drawer_bypass_style(self):
         if self.is_active_drawer:

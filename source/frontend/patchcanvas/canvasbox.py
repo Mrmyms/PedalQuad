@@ -362,7 +362,7 @@ class CanvasBox(QGraphicsObject):
                         port.widget.setY(last_out_pos)
                         last_out_pos += port_spacing
 
-            self.p_width     = max(self.p_width, 30 + max_in_width + max_out_width)
+            self.p_width     = max(self.p_width, 70 + max_in_width + max_out_width)
             self.p_width_in  = max_in_width
             self.p_width_out = max_out_width
 
