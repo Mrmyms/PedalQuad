@@ -38,13 +38,13 @@ except ImportError:
     PYQT_VERSION = 0x50600
 
 from PyQt5.QtCore import (
-    QT_VERSION, qCritical, QBuffer, QEventLoop, QFileInfo, QIODevice, QMimeData, QModelIndex, QPointF, QTimer, QEvent
+    QT_VERSION, qCritical, QBuffer, QFileInfo, QIODevice, QMimeData, QModelIndex, QTimer, QEvent
 )
 from PyQt5.QtGui import (
     QImage, QImageWriter, QPainter, QPalette, QBrush
 )
 from PyQt5.QtWidgets import (
-    QAction, QApplication, QInputDialog, QFileSystemModel, QListWidgetItem, QGraphicsView, QMainWindow
+    QApplication, QFileSystemModel, QGraphicsView, QMainWindow
 )
 
 # ------------------------------------------------------------------------------------------------------------
@@ -391,27 +391,10 @@ class HostWindow(QMainWindow):
         self.ui.w_transport.setEnabled(False)
 
         # ----------------------------------------------------------------------------------------------------
-        # Set up GUI (rack)
+        # Set up GUI (plugin list)
 
         self.ui.listWidget.setHostAndParent(self.host, self)
-
-        sb = self.ui.listWidget.verticalScrollBar()
-        self.ui.rackScrollBar.setMinimum(sb.minimum())
-        self.ui.rackScrollBar.setMaximum(sb.maximum())
-        self.ui.rackScrollBar.setValue(sb.value())
-
-        sb.rangeChanged.connect(self.ui.rackScrollBar.setRange)
-        sb.valueChanged.connect(self.ui.rackScrollBar.setValue)
-        self.ui.rackScrollBar.rangeChanged.connect(sb.setRange)
-        self.ui.rackScrollBar.valueChanged.connect(sb.setValue)
-
         self.updateStyle()
-
-        self.ui.rack.setStyleSheet("""
-          CarlaRackList#CarlaRackList {
-            background-color: black;
-          }
-        """)
 
         # ----------------------------------------------------------------------------------------------------
         # Set up GUI (patchbay)
@@ -452,14 +435,6 @@ class HostWindow(QMainWindow):
 
         # ----------------------------------------------------------------------------------------------------
         # Set up GUI (special stuff for Mac OS)
-
-        if MACOS:
-            self.ui.act_file_quit.setMenuRole(QAction.QuitRole)
-            self.ui.act_settings_configure.setMenuRole(QAction.PreferencesRole)
-            self.ui.act_help_about.setMenuRole(QAction.AboutRole)
-            self.ui.act_help_about_juce.setMenuRole(QAction.ApplicationSpecificRole)
-            self.ui.act_help_about_qt.setMenuRole(QAction.AboutQtRole)
-            self.ui.menu_Settings.setTitle("Panels")
 
         # ----------------------------------------------------------------------------------------------------
         # Load Settings
@@ -590,8 +565,6 @@ class HostWindow(QMainWindow):
 
         self.ui.keyboard.noteOn.connect(self.slot_noteOn)
         self.ui.keyboard.noteOff.connect(self.slot_noteOff)
-
-        self.ui.tabWidget.currentChanged.connect(self.slot_tabChanged)
 
         if withCanvas:
             self.ui.act_canvas_show_internal.triggered.connect(self.slot_canvasShowInternal)
@@ -869,11 +842,9 @@ class HostWindow(QMainWindow):
             return
 
     def projectLoadingStarted(self):
-        self.ui.rack.setEnabled(False)
         self.ui.graphicsView.setEnabled(False)
 
     def projectLoadingFinished(self, refreshCanvas):
-        self.ui.rack.setEnabled(True)
         self.ui.graphicsView.setEnabled(True)
 
         if self.fCustomStopAction == self.CUSTOM_ACTION_APP_CLOSE or not self.fWithCanvas:
@@ -2544,14 +2515,6 @@ class HostWindow(QMainWindow):
                 return
 
     @pyqtSlot(int)
-    def slot_tabChanged(self, index):
-        print(f"TAB CHANGED TO INDEX: {index}")
-        for i in range(self.ui.tabWidget.count()):
-            print(f"  Tab {i}: {self.ui.tabWidget.tabText(i)} (Widget: {self.ui.tabWidget.widget(i)})")
-        if index != 1:
-            return
-        self.ui.graphicsView.setFocus()
-
     @pyqtSlot(int)
     def slot_handleReloadAllCallback(self, pluginId):
         if pluginId >= self.fPluginCount:
@@ -2879,7 +2842,7 @@ class HostWindow(QMainWindow):
         else:
             value_fix = 1.5
 
-        rack_pal = self.ui.rack.palette()
+        rack_pal = self.palette()
         bg_color = rack_pal.window().color()
         fg_color = rack_pal.text().color()
         bg_value = 1.0 - bg_color.blackF()

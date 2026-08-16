@@ -16,6 +16,20 @@ class LinearKnobWidget(QWidget):
         self._is_dragging = False
         self._last_y = 0
         
+        # Cache drawing objects for better performance during paintEvent
+        self._bg_color = QColor("#2a2a35")
+        
+        self._pen_bg = QPen(QColor("#111115"))
+        self._pen_bg.setWidth(4)
+        self._pen_bg.setCapStyle(Qt.RoundCap)
+        
+        self._pen_val = QPen(QColor("#00ffff"))
+        self._pen_val.setWidth(4)
+        self._pen_val.setCapStyle(Qt.RoundCap)
+        
+        self._pen_ind = QPen(QColor("#00ffff"))
+        self._pen_ind.setWidth(2)
+        
     def setValue(self, val):
         self.value = max(0.0, min(1.0, val))
         self.update()
@@ -47,31 +61,23 @@ class LinearKnobWidget(QWidget):
         
         # Draw background circle
         painter.setPen(Qt.NoPen)
-        painter.setBrush(QColor("#2a2a35"))
+        painter.setBrush(self._bg_color)
         painter.drawEllipse(rect)
         
         # Draw arc background
-        pen_bg = QPen(QColor("#111115"))
-        pen_bg.setWidth(4)
-        pen_bg.setCapStyle(Qt.RoundCap)
-        painter.setPen(pen_bg)
+        painter.setPen(self._pen_bg)
         painter.setBrush(Qt.NoBrush)
         painter.drawArc(rect, -45 * 16, 270 * 16)
         
         # Draw value arc
-        pen_val = QPen(QColor("#00ffff"))
-        pen_val.setWidth(4)
-        pen_val.setCapStyle(Qt.RoundCap)
-        painter.setPen(pen_val)
+        painter.setPen(self._pen_val)
         span_angle = int(-270 * self.value * 16)
         painter.drawArc(rect, 225 * 16, span_angle)
         
         # Draw indicator line
         painter.translate(rect.center())
         painter.rotate(-135 + 270 * self.value)
-        pen_ind = QPen(QColor("#00ffff"))
-        pen_ind.setWidth(2)
-        painter.setPen(pen_ind)
+        painter.setPen(self._pen_ind)
         painter.drawLine(0, -10, 0, -20)
 
 
