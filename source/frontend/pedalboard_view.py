@@ -251,8 +251,9 @@ class ParameterDrawer(QFrame):
         
         # Read current bypass state if possible
         try:
-            info = self.host.get_plugin_info(pluginId)
-            self.is_active_drawer = info.get('active', True) if info else True
+            # -3 is PARAMETER_DRYWET
+            val = self.host.get_internal_parameter_value(pluginId, -3)
+            self.is_active_drawer = (val > 0.5)
         except:
             self.is_active_drawer = True
         self._update_drawer_bypass_style()
@@ -325,7 +326,7 @@ class ParameterDrawer(QFrame):
         if self.pluginId is not None:
             self.is_active_drawer = not self.is_active_drawer
             self._update_drawer_bypass_style()
-            self.host.set_active(self.pluginId, self.is_active_drawer)
+            self.host.set_drywet(self.pluginId, 1.0 if self.is_active_drawer else 0.0)
             
     def _update_drawer_bypass_style(self):
         if self.is_active_drawer:
